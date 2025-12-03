@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityDiscover Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* BASE THEME: ELECTRIC GLASS */
+        :root {
+            --primary: #7C3AED;
+            --accent: #06B6D4;
+            --bg-dark: #0F172A;
+            --text-main: #F1F5F9;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(148, 163, 184, 0.2);
+        }
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 10% 20%, #240c53 0%, #0F172A 60%, #060913 100%);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; padding: 0;
+            overflow: hidden; /* Hide scrollbars for presentation mode */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* NAVIGATION CONTROLS */
+        .controls {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            display: flex; gap: 10px; opacity: 0.5; transition: opacity 0.3s;
+        }
+        .controls:hover { opacity: 1; }
+        .nav-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border);
+            color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;
+        }
+        .nav-btn:hover { background: var(--primary); }
+
+        /* SLIDE CONTAINER */
+        .slide {
+            display: none; /* Hidden by default */
+            width: 100vw; height: 100vh;
+            padding: 60px 100px;
+            box-sizing: border-box;
+            flex-direction: column; justify-content: center;
+            position: absolute; top: 0; left: 0;
+            opacity: 0; transition: opacity 0.5s ease-in-out;
+        }
+        
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 10;
+        }
+
+        /* CARD DESIGN */
+        .glass-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-radius: 24px;
+            padding: 60px;
+            width: 100%;
+            height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+
+        /* TYPOGRAPHY */
+        h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -1px; }
+        h1 { font-size: 80px; background: linear-gradient(135deg, #fff 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 48px; color: var(--accent); margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; }
+        h3 { font-size: 32px; color: var(--text-main); margin-bottom: 15px; }
+        p, li { font-size: 24px; line-height: 1.6; color: #cbd5e1; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; padding-left: 30px; position: relative; }
+        li::before { content: '•'; color: var(--primary); font-size: 40px; position: absolute; left: 0; top: -5px; }
+        
+        /* LAYOUTS */
+        .title-layout { text-align: center; }
+        .subtitle { font-size: 32px; color: var(--primary); margin-top: 20px; font-weight: 600; }
+        
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; height: 100%; align-items: center; }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+        .tech-item { 
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; 
+            border-left: 4px solid var(--primary);
+        }
+        .tech-item strong { color: var(--accent); display: block; margin-bottom: 5px; font-size: 20px;}
+
+        .big-number { font-size: 140px; font-weight: 800; color: var(--primary); line-height: 1; }
+        .number-label { font-size: 28px; color: var(--accent); text-transform: uppercase; font-weight: 700; }
+
+        .timeline { display: flex; justify-content: space-between; margin-top: 60px; position: relative; }
+        .timeline::before { content:''; position:absolute; top: 20px; left:0; width:100%; height:4px; background: var(--border); z-index:0; }
+        .t-item { position: relative; z-index: 1; text-align: center; width: 25%; }
+        .t-dot { width: 40px; height: 40px; background: var(--bg-dark); border: 4px solid var(--accent); border-radius: 50%; margin: 0 auto 20px; }
+        .t-content h4 { color: var(--text-main); margin: 0; font-size: 20px; }
+        .t-content p { font-size: 16px; color: var(--text-muted); }
+        
+        /* Demo Button */
+        .demo-btn:hover {
+            background: var(--accent); color: var(--bg-dark) !important;
+            box-shadow: 0 0 30px var(--accent); transform: scale(1.05);
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: fixed; bottom: 20px; left: 20px;
+            color: var(--text-muted); font-size: 14px; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION CONTROLS -->
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="nav-btn" onclick="nextSlide()"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+    <div class="slide-counter" id="counter">1 / 6</div>
+
+    <!-- SLIDE 1: TITLE -->
+    <div class="slide active">
+        <div class="glass-box title-layout">
+            <div style="font-size: 80px; margin-bottom: 20px; animation: float 3s infinite ease-in-out;">📍</div>
+            <h1>CityExplorer</h1>
+            <p class="subtitle">Instant Urban Exploration powered by Open Data.</p>
+            <p style="margin-top: 60px; font-size: 18px; opacity: 0.7;">IS Micro-project • 12/03/2025</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: THE PROBLEM -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>The Context</h2>
+            <div class="two-column">
+                <div class="glass-card">
+                    <h3 style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> The Problem</h3>
+                    <ul>
+                        <li><strong>Google Maps:</strong> Information overload, focus on navigation only.</li>
+                        <li><strong>Local Directories:</strong> Often outdated, poor UX, ads everywhere.</li>
+                        <li><strong>Privacy Issues:</strong> User tracking & targeted advertising.</li>
+                    </ul>
+                </div>
+                <div class="glass-card" style="border-color: var(--accent);">
+                    <h3 style="color: var(--accent);"><i class="fa-solid fa-lightbulb"></i> Our Approach</h3>
+                    <ul>
+                        <li><strong>Instant:</strong> No account needed, fast loading.</li>
+                        <li><strong>Discovery:</strong> Search by "Mood" (Themes) not address.</li>
+                        <li><strong>Open Data:</strong> Global coverage, free & collaborative.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: DEMO -->
+    <div class="slide">
+        <div class="glass-box">
+            <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <h1>Live Demo</h1>
+                <p class="subtitle">Scenario: "I'm new in town, it's 6 PM..."</p>
+                <a href="https://cityex.netlify.app/" target="_blank" class="demo-btn" style="margin-top: 60px; padding: 25px 50px; border: 2px solid var(--accent); border-radius: 50px; color: var(--accent); font-size: 24px; font-weight: 700; text-decoration: none; display: inline-block; transition: all 0.3s ease;">
+                    <i class="fa-solid fa-desktop"></i> SWITCH TO BROWSER
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: TECH STACK -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>Technical Architecture</h2>
+            <div class="two-column">
+                <div>
+                    <p>A modern <strong>Single Page Application (SPA)</strong> built with a robust & type-safe ecosystem.</p>
+                    <br>
+                    <div class="tech-item" style="margin-bottom: 20px;">
+                        <strong><i class="fa-brands fa-react"></i> Core Stack</strong>
+                        Next.js (React) + TypeScript + Tailwind CSS.
+                    </div>
+                    <div class="tech-item">
+                        <strong><i class="fa-solid fa-server"></i> APIs & Data</strong>
+                        OpenStreetMap Ecosystem.
+                    </div>
+                </div>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <strong>Nominatim</strong>
+                        Geocoding (City -> GPS)
+                    </div>
+                    <div class="tech-item">
+                        <strong>React-Leaflet</strong>
+                        Interactive Maps
+                    </div>
+                    <div class="tech-item" style="grid-column: 1 / -1; border-color: var(--primary);">
+                        <strong>Overpass API</strong>
+                        Real-time database querying.
+                        <br><span style="font-size: 16px; opacity: 0.7;">Ex: node[amenity=cafe](bbox);</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: SECURITY -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>Security & Privacy</h2>
+            <div class="two-column">
+                <div style="text-align: center;">
+                    <div class="big-number">0</div>
+                    <div class="number-label">Data Stored</div>
+                    <p style="margin-top:20px; opacity:0.7;">No Database = No Leaks</p>
+                </div>
+                <div class="glass-card">
+                    <h3>🛡️ Privacy by Design</h3>
+                    <p>Our main innovation is risk elimination.</p>
+                    <ul>
+                        <li>No tracking cookies.</li>
+                        <li>No user database (No hacking risk).</li>
+                        <li>Local Geolocation (Browser side only).</li>
+                        <li>Native GDPR Compliance.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: ROADMAP -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>Roadmap</h2>
+            <div class="timeline">
+                <div class="t-item">
+                    <div class="t-dot"></div>
+                    <div class="t-content">
+                        <h4>V1.0 (Current)</h4>
+                        <p>Search & Filters</p>
+                    </div>
+                </div>
+                <div class="t-item">
+                    <div class="t-dot" style="border-color: #64748b;"></div>
+                    <div class="t-content">
+                        <h4>V1.1</h4>
+                        <p>Favorites (LocalStorage)</p>
+                    </div>
+                </div>
+                <div class="t-item">
+                    <div class="t-dot" style="border-color: #64748b;"></div>
+                    <div class="t-content">
+                        <h4>V2.0</h4>
+                        <p>Accessibility Filters</p>
+                    </div>
+                </div>
+                <div class="t-item">
+                    <div class="t-dot" style="border-color: #64748b;"></div>
+                    <div class="t-content">
+                        <h4>V3.0</h4>
+                        <p>Offline Mode (PWA)</p>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 80px;">
+                <h3>Thank you for your attention.</h3>
+                <p class="subtitle" style="font-size: 24px;">Any questions?</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('counter');
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            counter.innerText = `${index + 1} / ${slides.length}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</body>
+</html>
