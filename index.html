@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -37,6 +37,7 @@
         .nav-btn {
             background: rgba(255,255,255,0.1); border: 1px solid var(--border);
             color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;
+            font-size: 16px;
         }
         .nav-btn:hover { background: var(--primary); }
 
@@ -129,8 +130,9 @@
 
     <!-- NAVIGATION CONTROLS -->
     <div class="controls">
-        <button class="nav-btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="nav-btn" onclick="nextSlide()"><i class="fa-solid fa-chevron-right"></i></button>
+        <button class="nav-btn" onclick="prevSlide()" title="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="nav-btn" onclick="nextSlide()" title="Next"><i class="fa-solid fa-chevron-right"></i></button>
+        <button class="nav-btn" onclick="toggleFullScreen()" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
     </div>
     <div class="slide-counter" id="counter">1 / 6</div>
 
@@ -138,7 +140,7 @@
     <div class="slide active">
         <div class="glass-box title-layout">
             <div style="font-size: 80px; margin-bottom: 20px; animation: float 3s infinite ease-in-out;">📍</div>
-            <h1>CityExplorer</h1>
+            <h1>CityDiscover</h1>
             <p class="subtitle">Instant Urban Exploration powered by Open Data.</p>
             <p style="margin-top: 60px; font-size: 18px; opacity: 0.7;">IS Micro-project • 12/03/2025</p>
         </div>
@@ -312,12 +314,24 @@
             }
         }
 
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
         // Keyboard Navigation
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === 'Space') {
                 nextSlide();
             } else if (e.key === 'ArrowLeft') {
                 prevSlide();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullScreen();
             }
         });
 
@@ -332,5 +346,4 @@
         }
     </style>
 </body>
-
 </html>
