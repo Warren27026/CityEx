@@ -1,540 +1,350 @@
-<!DOCTYPE html>
-<html lang="fr" class="dark">
+
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CityDiscover - Explorer</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" >
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <title>CityDiscover Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* --- VARIABLES --- */
-        :root, .dark {
+        /* BASE THEME: ELECTRIC GLASS */
+        :root {
             --primary: #7C3AED;
-            --primary-glow: rgba(124, 58, 237, 0.2);
             --accent: #06B6D4;
-            --bg-main: #0F172A;
-            --bg-surface: rgba(30, 41, 59, 0.8);
+            --bg-dark: #0F172A;
             --text-main: #F1F5F9;
-            --text-muted: #94A3B8;
+            --glass-bg: rgba(30, 41, 59, 0.7);
             --border: rgba(148, 163, 184, 0.2);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --gradient-bg: radial-gradient(circle at 10% 20%, #240c53 0%, #0F172A 60%, #060913 100%);
-            --input-bg: rgba(0, 0, 0, 0.3);
-            --map-overlay: rgba(0,0,0,0.1);
         }
-
-        .light {
-            --primary: #5B21B6;
-            --primary-glow: rgba(91, 33, 182, 0.15);
-            --accent: #0D9488;
-            --bg-main: #F1F5F9;
-            --bg-surface: rgba(255, 255, 255, 0.85);
-            --text-main: #1E293B;
-            --text-muted: #64748B;
-            --border: rgba(148, 163, 184, 0.3);
-            --shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
-            --gradient-bg: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
-            --input-bg: #FFFFFF;
-            --map-overlay: rgba(255,255,255,0.0);
-        }
-
-        /* --- BASE --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 10% 20%, #240c53 0%, #0F172A 60%, #060913 100%);
+            color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-main); background-image: var(--gradient-bg); background-attachment: fixed;
-            color: var(--text-main); min-height: 100vh; overflow-x: hidden;
-            transition: background 0.5s, color 0.5s; font-weight: 500;
-        }
-        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
-
-        /* --- HEADER --- */
-        header {
-            background: var(--bg-surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border); padding: 15px 0;
-            position: sticky; top: 0; z-index: 1000;
-        }
-        .header-inner { display: flex; justify-content: space-between; align-items: center; }
-        .logo {
-            font-size: 26px; font-weight: 800;
-            background: linear-gradient(135deg, var(--text-main) 0%, var(--accent) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .tagline { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top:-2px;}
-        
-        .header-actions { display: flex; gap: 10px; }
-        .action-btn {
-            background: var(--input-bg); border: 1px solid var(--border);
-            color: var(--text-main); padding: 8px 14px; border-radius: 12px;
-            cursor: pointer; font-size: 14px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
-        }
-        .action-btn:hover { background: var(--border); transform: translateY(-1px); }
-
-        /* --- LAYOUT --- */
-        .grid-layout {
-            display: grid; grid-template-columns: 380px 1fr; gap: 24px;
-            margin-top: 30px; align-items: start; padding-bottom: 40px;
-        }
-        .card {
-            background: var(--bg-surface); backdrop-filter: blur(16px);
-            border: 1px solid var(--border); border-radius: 20px;
-            padding: 24px; box-shadow: var(--shadow); transition: all 0.3s ease;
-        }
-        .card:hover { border-color: var(--primary); }
-        h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 20px; font-weight: 800; }
-
-        /* --- CONTROLS --- */
-        .search-box { position: relative; margin-bottom: 20px; }
-        input {
-            width: 100%; background: var(--input-bg); border: 1px solid var(--border);
-            padding: 16px; padding-right: 50px; border-radius: 14px; color: var(--text-main);
-            font-family: inherit; font-size: 15px; font-weight: 600; transition: all 0.3s;
-        }
-        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-        input::placeholder { opacity: 0.6; }
-
-        .search-btn {
-            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            background: var(--primary); border: none; width: 38px; height: 38px;
-            border-radius: 10px; color: white; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; box-shadow: 0 4px 12px var(--primary-glow);
-        }
-        .search-btn:hover { background: var(--accent); transform: translateY(-50%) scale(1.05); }
-
-        .tags-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-        .tag-btn {
-            background: var(--input-bg); border: 1px solid var(--border);
-            padding: 8px 12px; border-radius: 50px; color: var(--text-muted);
-            cursor: pointer; font-size: 12px; font-weight: 700;
-            transition: all 0.2s; display: flex; align-items: center; gap: 6px;
-        }
-        .tag-btn:hover { border-color: var(--primary); color: var(--text-main); background: var(--border); }
-        .tag-btn.active {
-            background: var(--primary); color: white; border-color: var(--primary);
-            box-shadow: 0 4px 15px var(--primary-glow);
+            margin: 0; padding: 0;
+            overflow: hidden; /* Hide scrollbars for presentation mode */
+            height: 100vh;
+            width: 100vw;
         }
 
-        /* --- RESULTS --- */
-        .results-wrapper { max-height: 500px; overflow-y: auto; padding-right: 5px; }
-        .result-item {
-            background: var(--input-bg); border-radius: 16px; padding: 16px;
-            margin-bottom: 12px; border: 1px solid var(--border);
-            transition: all 0.2s; position: relative;
+        /* NAVIGATION CONTROLS */
+        .controls {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            display: flex; gap: 10px; opacity: 0.5; transition: opacity 0.3s;
         }
-        .result-item:hover { background: var(--bg-surface); border-color: var(--accent); transform: translateY(-2px); }
-        
-        .result-header { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
-        .place-name { font-weight: 700; color: var(--text-main); font-size: 15px; line-height: 1.3; }
-        .place-type { font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; margin-top: 4px; display: block; }
-        .place-address { 
-            display: flex; align-items: center; gap: 6px; 
-            font-size: 12px; color: var(--text-muted); margin-top: 8px; font-weight: 500; 
+        .controls:hover { opacity: 1; }
+        .nav-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid var(--border);
+            color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer;
+            font-size: 16px;
+        }
+        .nav-btn:hover { background: var(--primary); }
+
+        /* SLIDE CONTAINER */
+        .slide {
+            display: none; /* Hidden by default */
+            width: 100vw; height: 100vh;
+            padding: 60px 100px;
+            box-sizing: border-box;
+            flex-direction: column; justify-content: center;
+            position: absolute; top: 0; left: 0;
+            opacity: 0; transition: opacity 0.5s ease-in-out;
         }
         
-        .itinerary-btn {
-            margin-top: 12px; width: 100%; padding: 8px;
-            background: rgba(6, 182, 212, 0.1); color: var(--accent);
-            border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 8px;
-            font-size: 12px; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            transition: all 0.2s;
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 10;
         }
-        .itinerary-btn:hover { background: var(--accent); color: white; }
 
-        /* Empty State */
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
-        .empty-icon { font-size: 40px; margin-bottom: 15px; display: block; opacity: 0.8; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        /* CARD DESIGN */
+        .glass-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-radius: 24px;
+            padding: 60px;
+            width: 100%;
+            height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+        }
 
-        /* --- MAP --- */
-        #map { height: 650px; width: 100%; border-radius: 20px; z-index: 1; }
-        .map-wrapper { position: relative; padding: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 20px; }
+        /* TYPOGRAPHY */
+        h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -1px; }
+        h1 { font-size: 80px; background: linear-gradient(135deg, #fff 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 48px; color: var(--accent); margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; }
+        h3 { font-size: 32px; color: var(--text-main); margin-bottom: 15px; }
+        p, li { font-size: 24px; line-height: 1.6; color: #cbd5e1; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; padding-left: 30px; position: relative; }
+        li::before { content: '•'; color: var(--primary); font-size: 40px; position: absolute; left: 0; top: -5px; }
         
-        .user-pin {
-            background-color: #06B6D4; border: 3px solid white; border-radius: 50%;
-            width: 20px; height: 20px; animation: pulse-blue 2s infinite;
+        /* LAYOUTS */
+        .title-layout { text-align: center; }
+        .subtitle { font-size: 32px; color: var(--primary); margin-top: 20px; font-weight: 600; }
+        
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; height: 100%; align-items: center; }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
         }
-        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(6, 182, 212, 0); } 100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); } }
 
-        .stats-float {
-            position: absolute; bottom: 24px; left: 24px; right: 24px;
-            background: var(--bg-surface); backdrop-filter: blur(12px);
-            border-radius: 16px; padding: 12px 20px;
-            display: flex; justify-content: space-around; z-index: 500;
-            border: 1px solid var(--border); box-shadow: var(--shadow);
+        .tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+        .tech-item { 
+            background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; 
+            border-left: 4px solid var(--primary);
         }
-        .stat h3 { font-size: 20px; color: var(--accent); margin-bottom: 0; font-weight: 800;}
-        .stat p { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        .tech-item strong { color: var(--accent); display: block; margin-bottom: 5px; font-size: 20px;}
 
-        /* --- UTILS --- */
-        #status-bar { margin-top: 15px; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 600; display: none; }
-        .status-error { background: rgba(239, 68, 68, 0.15); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .status-success { background: rgba(16, 185, 129, 0.15); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .light .status-error { color: #DC2626; } .light .status-success { color: #059669; }
+        .big-number { font-size: 140px; font-weight: 800; color: var(--primary); line-height: 1; }
+        .number-label { font-size: 28px; color: var(--accent); text-transform: uppercase; font-weight: 700; }
 
-        .spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        .timeline { display: flex; justify-content: space-between; margin-top: 60px; position: relative; }
+        .timeline::before { content:''; position:absolute; top: 20px; left:0; width:100%; height:4px; background: var(--border); z-index:0; }
+        .t-item { position: relative; z-index: 1; text-align: center; width: 25%; }
+        .t-dot { width: 40px; height: 40px; background: var(--bg-dark); border: 4px solid var(--accent); border-radius: 50%; margin: 0 auto 20px; }
+        .t-content h4 { color: var(--text-main); margin: 0; font-size: 20px; }
+        .t-content p { font-size: 16px; color: var(--text-muted); }
+        
+        /* Demo Button */
+        .demo-btn:hover {
+            background: var(--accent); color: var(--bg-dark) !important;
+            box-shadow: 0 0 30px var(--accent); transform: scale(1.05);
+        }
 
-        @media (max-width: 900px) {
-            .grid-layout { grid-template-columns: 1fr; }
-            #map { height: 450px; }
+        /* Slide Counter */
+        .slide-counter {
+            position: fixed; bottom: 20px; left: 20px;
+            color: var(--text-muted); font-size: 14px; font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="container header-inner">
-            <div class="logo-container">
-                <div class="logo">City<span style="color: var(--primary)">Explorer</span></div>
-                <p class="tagline">L'Open Data au service de vos sorties.</p>
-            </div>
-            <div class="header-actions">
-                <button onclick="locateMe()" class="action-btn">🧭 Ma Position</button>
-                <button id="themeToggle" class="action-btn">☀️</button>
-            </div>
+    <!-- NAVIGATION CONTROLS -->
+    <div class="controls">
+        <button class="nav-btn" onclick="prevSlide()" title="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="nav-btn" onclick="nextSlide()" title="Next"><i class="fa-solid fa-chevron-right"></i></button>
+        <button class="nav-btn" onclick="toggleFullScreen()" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
+    </div>
+    <div class="slide-counter" id="counter">1 / 6</div>
+
+    <!-- SLIDE 1: TITLE -->
+    <div class="slide active">
+        <div class="glass-box title-layout">
+            <div style="font-size: 80px; margin-bottom: 20px; animation: float 3s infinite ease-in-out;">📍</div>
+            <h1>CityExplorer</h1>
+            <p class="subtitle">Instant Urban Exploration powered by Open Data.</p>
+            <p style="margin-top: 60px; font-size: 18px; opacity: 0.7;">IS Micro-project • 12/03/2025</p>
         </div>
-    </header>
+    </div>
 
-    <div class="container grid-layout">
-        
-        <div class="sidebar">
-            <div class="card">
-                <h2>1. Exploration</h2>
-                <div class="search-box">
-                    <input type="text" id="cityInput" placeholder="Quelle ville vous inspire ? (ex: Lyon...)">
-                    <button class="search-btn" onclick="triggerSearch()">🔍</button>
+    <!-- SLIDE 2: THE PROBLEM -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>The Context</h2>
+            <div class="two-column">
+                <div class="glass-card">
+                    <h3 style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> The Problem</h3>
+                    <ul>
+                        <li><strong>Google Maps:</strong> Information overload, focus on navigation only.</li>
+                        <li><strong>Local Directories:</strong> Often outdated, poor UX, ads everywhere.</li>
+                        <li><strong>Privacy Issues:</strong> User tracking & targeted advertising.</li>
+                    </ul>
                 </div>
-                <div id="status-bar"></div>
-            </div>
-
-            <div class="card" style="margin-top: 24px;">
-                <h2>2. Vos Envies (Filtres)</h2>
-                <div class="tags-grid" id="tagsContainer"></div>
-            </div>
-
-            <div class="card" style="margin-top: 24px;">
-                <h2 style="display: flex; justify-content: space-between; align-items: center;">
-                    3. Pépites trouvées
-                    <span id="resultCount" style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">0</span>
-                </h2>
-                <div class="results-wrapper" id="resultsList">
-                    <div class="empty-state">
-                        <span class="empty-icon">👋</span>
-                        <div style="font-weight: 700; font-size: 16px; margin-bottom: 5px;">Bienvenue !</div>
-                        <div style="font-size: 13px;">Localisez-vous et choisissez un thème pour révéler les lieux cachés autour de vous.</div>
-                    </div>
-                </div>
-                <div style="text-align: center; margin-top: 15px; font-size: 10px; color: var(--text-muted); opacity: 0.6;">
-                    Données © OpenStreetMap contributors
-                </div>
-            </div>
-        </div>
-
-        <div class="map-wrapper card">
-            <div id="map"></div>
-            <div class="stats-float">
-                <div class="stat">
-                    <h3 id="stat-places">0</h3>
-                    <p>Lieux</p>
-                </div>
-                <div class="stat">
-                    <h3 id="stat-cats">0</h3>
-                    <p>Filtres</p>
-                </div>
-                <div class="stat">
-                    <h3 style="color: var(--text-main)" id="stat-city">-</h3>
-                    <p>Zone</p>
+                <div class="glass-card" style="border-color: var(--accent);">
+                    <h3 style="color: var(--accent);"><i class="fa-solid fa-lightbulb"></i> Our Approach</h3>
+                    <ul>
+                        <li><strong>Instant:</strong> No account needed, fast loading.</li>
+                        <li><strong>Discovery:</strong> Search by "Mood" (Themes) not address.</li>
+                        <li><strong>Open Data:</strong> Global coverage, free & collaborative.</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- SLIDE 3: DEMO -->
+    <div class="slide">
+        <div class="glass-box">
+            <div style="text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <h1>Live Demo</h1>
+                <p class="subtitle">Scenario: "I'm new in town, it's 6 PM..."</p>
+                <a href="https://cityex.netlify.app/" target="_blank" class="demo-btn" style="margin-top: 60px; padding: 25px 50px; border: 2px solid var(--accent); border-radius: 50px; color: var(--accent); font-size: 24px; font-weight: 700; text-decoration: none; display: inline-block; transition: all 0.3s ease;">
+                    <i class="fa-solid fa-desktop"></i> SWITCH TO BROWSER
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: TECH STACK -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>Technical Architecture</h2>
+            <div class="two-column">
+                <div>
+                    <p>A modern <strong>Single Page Application (SPA)</strong> built with a robust & type-safe ecosystem.</p>
+                    <br>
+                    <div class="tech-item" style="margin-bottom: 20px;">
+                        <strong><i class="fa-brands fa-react"></i> Core Stack</strong>
+                        Next.js (React) + TypeScript + Tailwind CSS.
+                    </div>
+                    <div class="tech-item">
+                        <strong><i class="fa-solid fa-server"></i> APIs & Data</strong>
+                        OpenStreetMap Ecosystem.
+                    </div>
+                </div>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <strong>Nominatim</strong>
+                        Geocoding (City -> GPS)
+                    </div>
+                    <div class="tech-item">
+                        <strong>React-Leaflet</strong>
+                        Interactive Maps
+                    </div>
+                    <div class="tech-item" style="grid-column: 1 / -1; border-color: var(--primary);">
+                        <strong>Overpass API</strong>
+                        Real-time database querying.
+                        <br><span style="font-size: 16px; opacity: 0.7;">Ex: node[amenity=cafe](bbox);</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: SECURITY -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>Security & Privacy</h2>
+            <div class="two-column">
+                <div style="text-align: center;">
+                    <div class="big-number">0</div>
+                    <div class="number-label">Data Stored</div>
+                    <p style="margin-top:20px; opacity:0.7;">No Database = No Leaks</p>
+                </div>
+                <div class="glass-card">
+                    <h3>🛡️ Privacy by Design</h3>
+                    <p>Our main innovation is risk elimination.</p>
+                    <ul>
+                        <li>No tracking cookies.</li>
+                        <li>No user database (No hacking risk).</li>
+                        <li>Local Geolocation (Browser side only).</li>
+                        <li>Native GDPR Compliance.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: ROADMAP -->
+    <div class="slide">
+        <div class="glass-box">
+            <h2>Roadmap</h2>
+            <div class="timeline">
+                <div class="t-item">
+                    <div class="t-dot"></div>
+                    <div class="t-content">
+                        <h4>V1.0 (Current)</h4>
+                        <p>Search & Filters</p>
+                    </div>
+                </div>
+                <div class="t-item">
+                    <div class="t-dot" style="border-color: #64748b;"></div>
+                    <div class="t-content">
+                        <h4>V1.1</h4>
+                        <p>Favorites (LocalStorage)</p>
+                    </div>
+                </div>
+                <div class="t-item">
+                    <div class="t-dot" style="border-color: #64748b;"></div>
+                    <div class="t-content">
+                        <h4>V2.0</h4>
+                        <p>Accessibility Filters</p>
+                    </div>
+                </div>
+                <div class="t-item">
+                    <div class="t-dot" style="border-color: #64748b;"></div>
+                    <div class="t-content">
+                        <h4>V3.0</h4>
+                        <p>Offline Mode (PWA)</p>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 80px;">
+                <h3>Thank you for your attention.</h3>
+                <p class="subtitle" style="font-size: 24px;">Any questions?</p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- CONFIGURATION COMPLETE ---
-        const CONFIG = {
-            colors: {
-                musique: '#F472B6', lecture: '#60A5FA', sport: '#10B981', art: '#7C3AED', 
-                cinema: '#F97316', theatre: '#EF4444', gastronomie: '#FBBF24', nature: '#059669', 
-                histoire: '#9CA3AF', technologie: '#14B8A6', danse: '#EC4899', photographie: '#374151'
-            },
-            categories: [
-                { id: 'musique', label: 'Musique', icon: '🎵', colorId: 'musique', tags: ['amenity=music_school', 'amenity=music_venue', 'amenity=concert_hall', 'shop=music', 'amenity=nightclub'] },
-                { id: 'lecture', label: 'Lecture', icon: '📚', colorId: 'lecture', tags: ['amenity=library', 'shop=books'] },
-                { id: 'sport', label: 'Sport', icon: '⚽', colorId: 'sport', tags: ['leisure=sports_centre', 'leisure=stadium', 'leisure=fitness_centre', 'leisure=swimming_pool'] },
-                { id: 'art', label: 'Art', icon: '🎨', colorId: 'art', tags: ['tourism=museum', 'tourism=gallery', 'shop=art', 'amenity=arts_centre'] },
-                { id: 'cinema', label: 'Cinéma', icon: '🎬', colorId: 'cinema', tags: ['amenity=cinema'] },
-                { id: 'theatre', label: 'Théâtre', icon: '🎭', colorId: 'theatre', tags: ['amenity=theatre'] },
-                { id: 'gastronomie', label: 'Miam & Glou', icon: '🍽️', colorId: 'gastronomie', tags: ['amenity=restaurant', 'amenity=cafe', 'amenity=bar', 'amenity=ice_cream'] },
-                { id: 'nature', label: 'Nature', icon: '🌳', colorId: 'nature', tags: ['leisure=park', 'leisure=garden', 'natural=wood', 'landuse=grass'] },
-                { id: 'histoire', label: 'Histoire', icon: '🏛️', colorId: 'histoire', tags: ['historic=monument', 'historic=memorial', 'historic=castle', 'tourism=attraction'] },
-                { id: 'technologie', label: 'Tech', icon: '💻', colorId: 'technologie', tags: ['amenity=coworking_space', 'office=it', 'shop=computer'] },
-                { id: 'danse', label: 'Danse', icon: '💃', colorId: 'danse', tags: ['leisure=dance', 'amenity=dance_studio'] },
-                { id: 'shopping', label: 'Shopping', icon: '🛍️', colorId: 'photographie', tags: ['shop=clothes', 'shop=mall', 'shop=gift'] }
-            ]
-        };
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('counter');
 
-        // --- STATE ---
-        let map;
-        let markers = [];
-        let userMarker = null;
-        let currentBounds = null;
-        let activeCategories = new Set();
-        let allPlaces = [];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            setupThemeToggle();
-            initMap();
-            renderTags();
-            document.getElementById('cityInput').addEventListener('keypress', (e) => {
-                if(e.key === 'Enter') triggerSearch();
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
             });
+            counter.innerText = `${index + 1} / ${slides.length}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullScreen();
+            }
         });
 
-        // --- MAP ---
-        function initMap() {
-            if (map) map.remove();
-            map = L.map('map', { zoomControl: false }).setView([48.8566, 2.3522], 12); // Paris par défaut
-
-            const loadLayer = () => {
-                const isLight = document.documentElement.classList.contains('light');
-                const url = isLight 
-                    ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-                    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-                if (map.currentLayer) map.removeLayer(map.currentLayer);
-                map.currentLayer = L.tileLayer(url, {
-                    attribution: '&copy; OSM &copy; CARTO', subdomains: 'abcd', maxZoom: 19
-                }).addTo(map);
-            };
-            loadLayer();
-            L.control.zoom({ position: 'topright' }).addTo(map);
-            new MutationObserver(loadLayer).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        }
-
-        // --- SEARCH & GEO ---
-        function locateMe() {
-            if(!navigator.geolocation) return showStatus("Géolocalisation non supportée", "error");
-            showStatus("🛰️ Recherche des satellites...", "success");
-            
-            navigator.geolocation.getCurrentPosition(pos => {
-                const { latitude, longitude } = pos.coords;
-                const delta = 0.02; // Zoom plus serré pour la géoloc
-                currentBounds = { south: latitude - delta, north: latitude + delta, west: longitude - delta, east: longitude + delta };
-                
-                map.setView([latitude, longitude], 15);
-                
-                if(userMarker) map.removeLayer(userMarker);
-                const userIcon = L.divIcon({ className: 'user-pin', iconSize: [20, 20], popupAnchor: [0, -10] });
-                userMarker = L.marker([latitude, longitude], {icon: userIcon}).addTo(map).bindPopup("<b>📍 Vous êtes ici</b>").openPopup();
-
-                document.getElementById('stat-city').innerText = "Ma Position";
-                showStatus("✅ Vous êtes localisé ! Que cherche-t-on ?", "success");
-                resetSearchContext();
-            }, () => showStatus("Impossible de vous localiser.", "error"));
-        }
-
-        async function triggerSearch() {
-            const city = document.getElementById('cityInput').value;
-            if(!city) return;
-            showStatus('📡 En route vers ' + city + '...', 'success');
-            
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`);
-                const data = await res.json();
-                if(data.length === 0) throw new Error("Ville introuvable. Essayez avec le code postal ?");
-                
-                const loc = data[0];
-                const lat = parseFloat(loc.lat);
-                const lon = parseFloat(loc.lon);
-                const delta = 0.03; 
-                currentBounds = { south: lat - delta, north: lat + delta, west: lon - delta, east: lon + delta };
-
-                map.setView([lat, lon], 14);
-                document.getElementById('stat-city').innerText = loc.display_name.split(',')[0];
-                if(userMarker) { map.removeLayer(userMarker); userMarker = null; }
-
-                resetSearchContext();
-                showStatus(`✅ Bienvenue à ${loc.display_name.split(',')[0]} !`, 'success');
-
-            } catch(e) { showStatus(e.message, 'error'); }
-        }
-
-        function resetSearchContext() {
-            allPlaces = []; activeCategories.clear(); markers.forEach(m => map.removeLayer(m)); markers = [];
-            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
-            updateUI();
-        }
-
-        // --- DATA ---
-        async function toggleCategory(catId) {
-            if(!currentBounds) return showStatus("📍 Où cherchez-vous ? Entrez une ville ou localisez-vous.", "error");
-            const btn = document.getElementById(`btn-${catId}`);
-            
-            if(activeCategories.has(catId)) {
-                activeCategories.delete(catId); btn.classList.remove('active');
-                allPlaces = allPlaces.filter(p => p.categoryId !== catId);
-                filterMapAndList();
-            } else {
-                activeCategories.add(catId); btn.classList.add('active');
-                await fetchOverpassData(catId, btn);
-            }
-        }
-
-        async function fetchOverpassData(catId, btnElement) {
-            const catConfig = CONFIG.categories.find(c => c.id === catId);
-            const originalText = btnElement.innerHTML;
-            btnElement.innerHTML = `<span class="spinner"></span> Chargement...`; btnElement.classList.add('loading');
-
-            try {
-                const bbox = `${currentBounds.south},${currentBounds.west},${currentBounds.north},${currentBounds.east}`;
-                const queries = catConfig.tags.map(tag => `node[${tag}](${bbox});way[${tag}](${bbox});`).join('');
-                const query = `[out:json][timeout:15];(${queries});out center 15;`; // Max 15 résultats par type
-
-                const res = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', body: 'data=' + encodeURIComponent(query) });
-                const data = await res.json();
-                
-                const newPlaces = data.elements.map(el => {
-                    const t = el.tags || {};
-                    const lat = el.lat || (el.center ? el.center.lat : null);
-                    const lon = el.lon || (el.center ? el.center.lon : null);
-                    if (!lat || !lon) return null;
-
-                    // --- LOGIQUE D'ADRESSE ROBUSTE ---
-                    let address = "Adresse non renseignée";
-                    if (t['addr:street']) {
-                        address = (t['addr:housenumber'] || '') + ' ' + t['addr:street'];
-                    } else if (t['addr:place']) {
-                        address = t['addr:place']; // Lieu-dit
-                    } else if (t['addr:city']) {
-                         address = "Quartier " + t['addr:city'];
-                    } else {
-                        address = "Position approximative";
-                    }
-
-                    return {
-                        id: el.id, 
-                        name: t.name || catConfig.label + ' (Sans nom)',
-                        desc: t.cuisine || t.amenity || catConfig.label,
-                        address: address,
-                        lat: lat, lng: lon, categoryId: catId, color: CONFIG.colors[catConfig.colorId]
-                    };
-                }).filter(p => p && p.name);
-
-                newPlaces.forEach(np => { if (!allPlaces.some(p => p.id === np.id)) allPlaces.push(np); });
-                
-                if(newPlaces.length === 0) showStatus(`Rien trouvé pour "${catConfig.label}" ici.`, "error");
-                else showStatus(`✨ ${newPlaces.length} pépites ajoutées !`, 'success');
-
-                filterMapAndList();
-
-            } catch(e) {
-                console.error(e); showStatus("⚠️ Erreur réseau.", "error");
-                activeCategories.delete(catId); btnElement.classList.remove('active');
-            } finally { btnElement.innerHTML = originalText; btnElement.classList.remove('loading'); }
-        }
-
-        // --- RENDER ---
-        function filterMapAndList() {
-            markers.forEach(m => map.removeLayer(m)); markers = [];
-            
-            const visiblePlaces = allPlaces.filter(p => activeCategories.has(p.categoryId));
-            visiblePlaces.forEach(p => {
-                const icon = L.divIcon({
-                    className: 'custom-icon',
-                    html: `<div style="width: 14px; height: 14px; background: ${p.color}; border-radius: 50%; box-shadow: 0 0 0 2px white, 0 4px 8px rgba(0,0,0,0.3);"></div>`
-                });
-                
-                // Popup avec lien itinéraire
-                const popupContent = `
-                    <div style="font-family: 'Plus Jakarta Sans', sans-serif; min-width: 200px;">
-                        <b style="color:${p.color}; font-size:14px">${p.name}</b><br>
-                        <span style="font-size:12px; color:#64748B">${p.desc}</span><br>
-                        <div style="margin-top:8px; font-size:11px;">📍 ${p.address}</div>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}" target="_blank" 
-                           style="display:block; margin-top:8px; text-align:center; background:${p.color}; color:white; padding:6px; border-radius:6px; text-decoration:none; font-weight:700; font-size:12px;">
-                           🚗 Y aller
-                        </a>
-                    </div>
-                `;
-
-                const m = L.marker([p.lat, p.lng], {icon}).addTo(map).bindPopup(popupContent);
-                markers.push(m);
-            });
-            
-            if(markers.length > 0) {
-                 const group = L.featureGroup(markers);
-                 if(userMarker) group.addLayer(userMarker);
-                 map.fitBounds(group.getBounds().pad(0.1));
-            }
-            updateUI(visiblePlaces);
-        }
-
-        function updateUI(places = []) {
-            const listEl = document.getElementById('resultsList');
-            if(places.length === 0) {
-                 if(activeCategories.size > 0) {
-                     listEl.innerHTML = `
-                        <div class="empty-state">
-                            <span class="empty-icon">🤔</span>
-                            <div style="font-weight: 700; font-size: 15px;">Aucun résultat ici.</div>
-                            <div style="font-size: 13px;">Essayez une zone plus dense ou un autre filtre.</div>
-                        </div>`;
-                 } else {
-                     listEl.innerHTML = `
-                        <div class="empty-state">
-                            <span class="empty-icon">👋</span>
-                            <div style="font-weight: 700; font-size: 16px; margin-bottom: 5px;">Bienvenue !</div>
-                            <div style="font-size: 13px;">Localisez-vous et choisissez un thème pour révéler les lieux cachés autour de vous.</div>
-                        </div>`;
-                 }
-            } else {
-                listEl.innerHTML = places.map(p => `
-                    <div class="result-item">
-                        <div class="result-header" onclick="map.setView([${p.lat}, ${p.lng}], 16); markers.find(m => m.getLatLng().lat === ${p.lat})?.openPopup()">
-                            <div>
-                                <div class="place-name">${p.name}</div>
-                                <span class="place-type" style="color:${p.color}">${p.desc}</span>
-                            </div>
-                            <div style="width:10px; height:10px; border-radius:50%; background:${p.color};"></div>
-                        </div>
-                        <div class="place-address">📍 ${p.address}</div>
-                        
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}" target="_blank" class="itinerary-btn">
-                            🚗 Y aller (Google Maps)
-                        </a>
-                    </div>
-                `).join('');
-            }
-            document.getElementById('stat-places').innerText = places.length;
-            document.getElementById('stat-cats').innerText = activeCategories.size;
-            document.getElementById('resultCount').innerText = places.length;
-        }
-
-        function renderTags() {
-            document.getElementById('tagsContainer').innerHTML = CONFIG.categories.map(cat => `
-                <button class="tag-btn" onclick="toggleCategory('${cat.id}')" id="btn-${cat.id}">
-                    <span>${cat.icon}</span> ${cat.label}
-                </button>
-            `).join('');
-        }
-        function showStatus(msg, type) {
-            const el = document.getElementById('status-bar');
-            el.innerHTML = msg; el.className = type === 'error' ? 'status-error' : 'status-success';
-            el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 5000);
-        }
-        function setupThemeToggle() {
-            const t = document.getElementById('themeToggle');
-            const upd = () => t.innerText = document.documentElement.classList.contains('light') ? '🌙' : '☀️';
-            upd();
-            t.addEventListener('click', () => {
-                document.documentElement.classList.toggle('light'); document.documentElement.classList.toggle('dark'); upd();
-            });
-        }
+        // Initialize
+        showSlide(0);
     </script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
 </body>
 </html>
+
